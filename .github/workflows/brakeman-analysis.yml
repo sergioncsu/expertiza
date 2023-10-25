@@ -5,7 +5,7 @@ name: Brakeman Scan
 
 on:
   push:
-    branches: [ main, development ]
+    branches: [ main, development, sachin-dev ]
   pull_request:
     branches: [ main, development ]
 

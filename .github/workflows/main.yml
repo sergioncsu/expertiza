@@ -6,7 +6,7 @@ on:
     branches: [main, development]
     paths-ignore: ['**.md', '**.yml']
   push:
-    branches: [main, development]
+    branches: [main, development, sachin-dev]
     paths-ignore: ['**.md', '**.yml']
   
 jobs:
