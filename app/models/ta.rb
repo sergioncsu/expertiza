@@ -130,5 +130,5 @@ class Ta < User
     courses = Ta.get_mapped_courses(user.id)
     participants = courses.flat_map { |course_id| Course.find(course_id).get_participants }
     participants.select { |p| user.role.has_all_privileges_of?(p.user.role) }.map(&:user)
-  endgit 
+  end
 end
