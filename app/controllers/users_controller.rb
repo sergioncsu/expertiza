@@ -106,13 +106,14 @@ class UsersController < ApplicationController
   end
 
   def show
+    # check whether current user is authorized to edit the user being searched, call show if true
     if params[:id].nil? || ((current_user_is_a? 'Student') && (!current_user_has_id? params[:id]))
       redirect_to(action: AuthHelper.get_home_action(session[:user]), controller: AuthHelper.get_home_controller(session[:user]))
     else
       @user = User.find(params[:id])
       @role = @user.role
       @assignment_participant_num = AssignmentParticipant.where(user_id: @user.id).count
-      @maps = ResponseMap.where('reviewee_id = ? or reviewer_id = ?', params[:id], params[:id])
+      @maps = ResponseMap.where('reviewee_id = :id OR reviewer_id = :id', id: params[:id])
       @total_user_num = User.count
     end
   end
@@ -212,7 +213,7 @@ class UsersController < ApplicationController
     # when a new user joins or an existing user updates his/her profile they will get to choose
     # from all the roles available
     role = Role.find(session[:user].role_id)
-    @all_roles = Role.where('id in (?) or id = ?', role.get_available_roles, role.id)
+    @all_roles = Role.where('id in  or id = ?', role.get_available_roles, role.id)
   end
 
   private

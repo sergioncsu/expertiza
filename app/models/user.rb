@@ -19,30 +19,21 @@ class User < ApplicationRecord
   has_many :track_notifications, dependent: :destroy
   belongs_to :parent, class_name: 'User'
   belongs_to :role
-  validates :name, presence: true
-  validates :name, uniqueness: true
-  validates :name, format: { without: /\s/ }
 
-  validates :email, presence: { message: "can't be blank" }
-  validates :email, format: { with: /\A[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\z/i, allow_blank: true }
-
+  validates :name, presence: true, uniqueness: true, format: { without: /\s/ }
+  validates :email,
+            presence: { message: "can't be blank" },
+            format: { with: /\A[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}\z/i, allow_blank: true }
   validates :fullname, presence: true
 
   before_validation :randomize_password, if: ->(user) { user.new_record? && user.password.blank? } # AuthLogic
 
-  scope :superadministrators, -> { where role_id: Role.superadministrator }
-  scope :superadmins, -> { superadministrators }
-  scope :administrators, -> { where role_id: Role.administrator }
-  scope :admins, -> { administrators }
+  scope :admins, -> { where role_id: Role.administrator }
   scope :instructors, -> { where role_id: Role.instructor }
   scope :tas, -> { where role_id: Role.ta }
   scope :students, -> { where role_id: Role.student }
 
   has_paper_trail
-
-  def salt_first?
-    true
-  end
 
   def list_mine(object_type, user_id)
     object_type.where(['instructor_id = ?', user_id])
@@ -56,9 +47,10 @@ class User < ApplicationRecord
   end
 
   def can_impersonate?(user)
-    return true if role.super_admin?
-    return true if teaching_assistant_for?(user)
-    return true if recursively_parent_of(user)
+    # Takes a user object and returns true if the current user has permission to impersonate the provided user.
+    role.super_admin? ||
+      teaching_assistant_for?(user) ||
+      recursively_parent_of(user)
 
     false
   end
